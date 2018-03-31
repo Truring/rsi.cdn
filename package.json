@@ -1,0 +1,30 @@
+{
+  "name": "@rsi/cdn",
+  "version": "0.2.5",
+  "description": "The Cdn for @rsi/server and @rsi-plugins/*",
+  "main": "dist/public_api.js",
+  "types": "dist/public_api.d.ts",
+  "scripts": {
+    "test": "node spec/runner.js",
+    "build": "npm run build:dev",
+    "build:dev": "tsc",
+    "build:prod": "npm run lint && tsc",
+    "lint": "tslint --project ./tsconfig.json",
+    "lint:fix": "tslint --fix --project ./tsconfig.json"
+  },
+  "author": "Dr. Patrick Bartsch",
+  "contributors": [],
+  "license": "MIT",
+  "dependencies": {
+    "@rsi/core": "git+https://github.com/wzr1337/rsi.core.git#0.2.4",
+    "express": "^4.16.3",
+    "file-type": "^7.6.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.11.1",
+    "@types/file-type": "^5.2.1",
+    "@types/winston": "^2.3.8",
+    "tslint": "^5.9.1",
+    "typescript": "^2.7.2"
+  }
+}
