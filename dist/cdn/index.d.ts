@@ -29,7 +29,7 @@ declare class Cdn {
      *
      * @return {express.RequestHandler} a function that takes a response, request and next argument
      */
-    process(): express.RequestHandler;
+    requestHandler(): express.RequestHandler;
     /**
      * Other services use this method to register callbacks for file access
      *

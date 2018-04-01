@@ -18,29 +18,26 @@ export type ICdnCallback = (resourceName: string, fileName: string) => Buffer;
  * The cdn service provides access to binary data (e.g. images)
  */
 class Cdn {
-
   /**
    * The Cdn is a singleton, get an instance by calling the method.
    *
    * @return {Cdn} instance of cdn service
    */
   public static getInstance(): Cdn {
-    return Cdn.instance;
+    return this.instance || (this.instance = new this());
   }
 
-  private static instance: Cdn = new Cdn();
+  private static instance: Cdn;
 
   private logger: IRsiLoggerInstance;
   private fileRegistry: {
-    [filename: string]: ICdnCallback
-  } = {};
+    [resource: string]: {
+      [filename: string]: ICdnCallback
+    }
+  } = {images: {}};
 
   private constructor() {
     this.logger = RsiLogger.getInstance().getLogger("cdn");
-    if (Cdn.instance) {
-      throw new Error("Error: Instantiation failed: Use SingletonClass.getInstance() instead of new.");
-    }
-    Cdn.instance = this;
   }
 
   /**
@@ -48,12 +45,10 @@ class Cdn {
    *
    * @return {express.RequestHandler} a function that takes a response, request and next argument
    */
-  public process(): express.RequestHandler {
-    const FILENAME_REGEX = /^.*\/([\w,\s-]+)\/([\w,\s-]+)\/([\w,\s-]+\.[A-Za-z]{3,4})(?:\?.*)?$/;
-
+  public requestHandler(): express.RequestHandler {
     return (req: express.Request, res: express.Response, next: express.NextFunction) => {
       const origUrl = req.originalUrl;
-      if (null === origUrl.match(FILENAME_REGEX) ) {
+      if (! req.params.filename) {
         res.status(501);
         res.json({
           message: "Directory listing not supported",
@@ -61,11 +56,10 @@ class Cdn {
         });
         return;
       }
-      const filename: string = origUrl.match(FILENAME_REGEX)[3];
-      const resourcename: string = origUrl.match(FILENAME_REGEX)[2];
-      const path: string = resourcename + "/" + filename;
-      if (this.fileRegistry[path]) {
-        const img = this.fileRegistry[path](resourcename, filename);
+      const filename: string = req.params.filename;
+      const resourcename: string = req.params.resource;
+      if (this.fileRegistry[resourcename] && this.fileRegistry[resourcename][filename]) {
+        const img = this.fileRegistry[resourcename][filename](resourcename, filename);
 
         res.writeHead(200, {
           "Content-Length": img.length,
@@ -90,12 +84,12 @@ class Cdn {
    * @return {Boolean} true on success
    */
   public register(resourceName: string, fileName: string, callback: ICdnCallback): boolean {
-    const path = resourceName + "/" + fileName;
-    this.logger.silly(`registering a handler for ${path}`);
-    const lookup = typeof this.fileRegistry[path] === "function";
+    this.logger.silly(`registering a handler for cdn/${resourceName}/${fileName}`);
+    if (!this.fileRegistry[resourceName]) {this.fileRegistry[resourceName] = {}; }
+    const lookup = typeof this.fileRegistry[resourceName][fileName] === "function";
     if (!lookup && typeof callback === "function") {
       // filename not yet registered
-      this.fileRegistry[path] = callback;
+      this.fileRegistry[resourceName][fileName] = callback;
       return true;
     }
     return false;

@@ -7,12 +7,8 @@ var core_1 = require("@rsi/core");
  */
 var Cdn = /** @class */ (function () {
     function Cdn() {
-        this.fileRegistry = {};
+        this.fileRegistry = { images: {} };
         this.logger = core_1.RsiLogger.getInstance().getLogger("cdn");
-        if (Cdn.instance) {
-            throw new Error("Error: Instantiation failed: Use SingletonClass.getInstance() instead of new.");
-        }
-        Cdn.instance = this;
     }
     /**
      * The Cdn is a singleton, get an instance by calling the method.
@@ -20,19 +16,18 @@ var Cdn = /** @class */ (function () {
      * @return {Cdn} instance of cdn service
      */
     Cdn.getInstance = function () {
-        return Cdn.instance;
+        return this.instance || (this.instance = new this());
     };
     /**
      * This method process es Cdn calls
      *
      * @return {express.RequestHandler} a function that takes a response, request and next argument
      */
-    Cdn.prototype.process = function () {
+    Cdn.prototype.requestHandler = function () {
         var _this = this;
-        var FILENAME_REGEX = /^.*\/([\w,\s-]+)\/([\w,\s-]+)\/([\w,\s-]+\.[A-Za-z]{3,4})(?:\?.*)?$/;
         return function (req, res, next) {
             var origUrl = req.originalUrl;
-            if (null === origUrl.match(FILENAME_REGEX)) {
+            if (!req.params.filename) {
                 res.status(501);
                 res.json({
                     message: "Directory listing not supported",
@@ -40,11 +35,10 @@ var Cdn = /** @class */ (function () {
                 });
                 return;
             }
-            var filename = origUrl.match(FILENAME_REGEX)[3];
-            var resourcename = origUrl.match(FILENAME_REGEX)[2];
-            var path = resourcename + "/" + filename;
-            if (_this.fileRegistry[path]) {
-                var img = _this.fileRegistry[path](resourcename, filename);
+            var filename = req.params.filename;
+            var resourcename = req.params.resource;
+            if (_this.fileRegistry[resourcename] && _this.fileRegistry[resourcename][filename]) {
+                var img = _this.fileRegistry[resourcename][filename](resourcename, filename);
                 res.writeHead(200, {
                     "Content-Length": img.length,
                     "Content-Type": filetype(img).mime
@@ -67,17 +61,18 @@ var Cdn = /** @class */ (function () {
      * @return {Boolean} true on success
      */
     Cdn.prototype.register = function (resourceName, fileName, callback) {
-        var path = resourceName + "/" + fileName;
-        this.logger.silly("registering a handler for " + path);
-        var lookup = typeof this.fileRegistry[path] === "function";
+        this.logger.silly("registering a handler for cdn/" + resourceName + "/" + fileName);
+        if (!this.fileRegistry[resourceName]) {
+            this.fileRegistry[resourceName] = {};
+        }
+        var lookup = typeof this.fileRegistry[resourceName][fileName] === "function";
         if (!lookup && typeof callback === "function") {
             // filename not yet registered
-            this.fileRegistry[path] = callback;
+            this.fileRegistry[resourceName][fileName] = callback;
             return true;
         }
         return false;
     };
-    Cdn.instance = new Cdn();
     return Cdn;
 }());
 exports.Cdn = Cdn;
