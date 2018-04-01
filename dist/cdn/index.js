@@ -26,6 +26,7 @@ var Cdn = /** @class */ (function () {
     Cdn.prototype.requestHandler = function () {
         var _this = this;
         return function (req, res, next) {
+            console.log("looking up " + req.params.filename);
             var origUrl = req.originalUrl;
             if (!req.params.filename) {
                 res.status(501);
@@ -61,6 +62,7 @@ var Cdn = /** @class */ (function () {
      * @return {Boolean} true on success
      */
     Cdn.prototype.register = function (resourceName, fileName, callback) {
+        console.log("registering a handler for cdn/" + resourceName + "/" + fileName);
         this.logger.silly("registering a handler for cdn/" + resourceName + "/" + fileName);
         if (!this.fileRegistry[resourceName]) {
             this.fileRegistry[resourceName] = {};

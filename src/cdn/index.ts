@@ -47,6 +47,7 @@ class Cdn {
    */
   public requestHandler(): express.RequestHandler {
     return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      console.log(`looking up ${req.params.filename}`);
       const origUrl = req.originalUrl;
       if (! req.params.filename) {
         res.status(501);
@@ -84,6 +85,7 @@ class Cdn {
    * @return {Boolean} true on success
    */
   public register(resourceName: string, fileName: string, callback: ICdnCallback): boolean {
+    console.log(`registering a handler for cdn/${resourceName}/${fileName}`);
     this.logger.silly(`registering a handler for cdn/${resourceName}/${fileName}`);
     if (!this.fileRegistry[resourceName]) {this.fileRegistry[resourceName] = {}; }
     const lookup = typeof this.fileRegistry[resourceName][fileName] === "function";
