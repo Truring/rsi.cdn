@@ -37,7 +37,7 @@ class Cdn {
   } = {images: {}};
 
   private constructor() {
-    this.logger = RsiLogger.getInstance().getLogger("cdn");
+    this.logger = RsiLogger.getInstance().getLogger("cdn", "silly");
   }
 
   /**
@@ -47,7 +47,7 @@ class Cdn {
    */
   public requestHandler(): express.RequestHandler {
     return (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      console.log(`looking up ${req.params.filename}`);
+      this.logger.silly(`looking up ${req.originalUrl}`);
       const origUrl = req.originalUrl;
       if (! req.params.filename) {
         res.status(501);
@@ -70,7 +70,7 @@ class Cdn {
         res.end(img);
       } else {
         res.status(404);
-        res.send("File not found");
+        res.send("File(s) not found");
       }
     };
   }
@@ -82,19 +82,18 @@ class Cdn {
    * @param fileName {string} The name of the file to be made available
    * @param callback {ICdnCallback} The callback to be called on route access
    *
-   * @return {Boolean} true on success
+   * @return {string} registered path on success, null on failure
    */
-  public register(resourceName: string, fileName: string, callback: ICdnCallback): boolean {
-    console.log(`registering a handler for cdn/${resourceName}/${fileName}`);
+  public register(resourceName: string, fileName: string, callback: ICdnCallback): string {
     this.logger.silly(`registering a handler for cdn/${resourceName}/${fileName}`);
     if (!this.fileRegistry[resourceName]) {this.fileRegistry[resourceName] = {}; }
     const lookup = typeof this.fileRegistry[resourceName][fileName] === "function";
     if (!lookup && typeof callback === "function") {
       // filename not yet registered
       this.fileRegistry[resourceName][fileName] = callback;
-      return true;
+      return `cdn/${resourceName}/${fileName}`;
     }
-    return false;
+    return null;
   }
 }
 

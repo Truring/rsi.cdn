@@ -37,8 +37,8 @@ declare class Cdn {
      * @param fileName {string} The name of the file to be made available
      * @param callback {ICdnCallback} The callback to be called on route access
      *
-     * @return {Boolean} true on success
+     * @return {string} registered path on success, null on failure
      */
-    register(resourceName: string, fileName: string, callback: ICdnCallback): boolean;
+    register(resourceName: string, fileName: string, callback: ICdnCallback): string;
 }
 export { Cdn };

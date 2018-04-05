@@ -8,7 +8,7 @@ var core_1 = require("@rsi/core");
 var Cdn = /** @class */ (function () {
     function Cdn() {
         this.fileRegistry = { images: {} };
-        this.logger = core_1.RsiLogger.getInstance().getLogger("cdn");
+        this.logger = core_1.RsiLogger.getInstance().getLogger("cdn", "silly");
     }
     /**
      * The Cdn is a singleton, get an instance by calling the method.
@@ -26,7 +26,7 @@ var Cdn = /** @class */ (function () {
     Cdn.prototype.requestHandler = function () {
         var _this = this;
         return function (req, res, next) {
-            console.log("looking up " + req.params.filename);
+            _this.logger.silly("looking up " + req.originalUrl);
             var origUrl = req.originalUrl;
             if (!req.params.filename) {
                 res.status(501);
@@ -48,7 +48,7 @@ var Cdn = /** @class */ (function () {
             }
             else {
                 res.status(404);
-                res.send("File not found");
+                res.send("File(s) not found");
             }
         };
     };
@@ -59,10 +59,9 @@ var Cdn = /** @class */ (function () {
      * @param fileName {string} The name of the file to be made available
      * @param callback {ICdnCallback} The callback to be called on route access
      *
-     * @return {Boolean} true on success
+     * @return {string} registered path on success, null on failure
      */
     Cdn.prototype.register = function (resourceName, fileName, callback) {
-        console.log("registering a handler for cdn/" + resourceName + "/" + fileName);
         this.logger.silly("registering a handler for cdn/" + resourceName + "/" + fileName);
         if (!this.fileRegistry[resourceName]) {
             this.fileRegistry[resourceName] = {};
@@ -71,9 +70,9 @@ var Cdn = /** @class */ (function () {
         if (!lookup && typeof callback === "function") {
             // filename not yet registered
             this.fileRegistry[resourceName][fileName] = callback;
-            return true;
+            return "cdn/" + resourceName + "/" + fileName;
         }
-        return false;
+        return null;
     };
     return Cdn;
 }());
