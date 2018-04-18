@@ -1,5 +1,10 @@
+<a name="0.2.8"></a>
+## [0.2.8](https://github.com/wzr1337/rsi.cdn/compare/0.2.7...0.2.8) (2018-04-18)
+
+
+
 <a name="0.2.7"></a>
-## [0.2.7](https://github.com/wzr1337/rsi.cdn/compare/0.2.6...v0.2.7) (2018-04-10)
+## [0.2.7](https://github.com/wzr1337/rsi.cdn/compare/0.2.6...0.2.7) (2018-04-10)
 
 
 
