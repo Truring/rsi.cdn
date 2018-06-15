@@ -5,25 +5,29 @@
   "main": "dist/public_api.js",
   "types": "dist/public_api.d.ts",
   "scripts": {
-    "test": "node spec/runner.js",
+    "test": "jasmine",
     "build": "npm run build:dev",
     "build:dev": "tsc",
-    "build:prod": "npm run lint && tsc",
+    "build:prod": "npm run lint && tsc && npm run test",
     "lint": "tslint --project ./tsconfig.json",
-    "lint:fix": "tslint --fix --project ./tsconfig.json"
+    "lint:fix": "tslint --fix --project ./tsconfig.json",
+    "version": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md"
   },
   "author": "Dr. Patrick Bartsch",
   "contributors": [],
   "license": "MIT",
   "dependencies": {
-    "@rsi/core": "git+https://github.com/wzr1337/rsi.core.git#0.2.7",
+    "@rsi/core": "git+https://github.com/wzr1337/rsi.core.git#0.2.9",
     "express": "^4.16.3",
     "file-type": "^7.6.0"
   },
   "devDependencies": {
     "@types/express": "^4.11.1",
     "@types/file-type": "^5.2.1",
+    "@types/jasmine": "^2.8.8",
     "@types/winston": "^2.3.8",
+    "conventional-changelog-cli": "^2.0.1",
+    "jasmine": "^3.1.0",
     "tslint": "^5.9.1",
     "typescript": "^2.7.2"
   }
