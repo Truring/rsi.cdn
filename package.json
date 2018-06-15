@@ -1,6 +1,6 @@
 {
   "name": "@rsi/cdn",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "The Cdn for @rsi/server and @rsi-plugins/*",
   "main": "dist/public_api.js",
   "types": "dist/public_api.d.ts",
