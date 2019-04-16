@@ -59,6 +59,15 @@ class Cdn {
       }
       const filename: string = req.params.filename;
       const resourcename: string = req.params.resource;
+      
+      if (this.fileRegistry[resourcename]){
+        res.send("resourcenameok");
+      }
+      if(this.fileRegistry[resourcename][filename]) {
+        res.send("filenameok");
+      }
+   
+      /**
       if (this.fileRegistry[resourcename] && this.fileRegistry[resourcename][filename]) {
         const img = this.fileRegistry[resourcename][filename](resourcename, filename);
 
@@ -72,6 +81,7 @@ class Cdn {
         res.status(404);
         res.send("File(s) not found");
       }
+      **/
     };
   }
 
